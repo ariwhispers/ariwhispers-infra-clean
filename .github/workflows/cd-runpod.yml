@@ -1,0 +1,28 @@
+name: CD – Build & Push to GHCR, Deploy to RunPod
+on:
+  workflow_run:
+    workflows: ['CI']
+    types: [completed]
+    branches: [main]
+jobs:
+  deploy:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    permissions: {packages: write, contents: read}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - run: |
+          IMAGE=ghcr.io/${{ github.repository }}:${{ github.sha }}
+          docker build -t $IMAGE .
+          docker push $IMAGE
+      - if: true
+        env:
+          RUNPOD_API_KEY: ''
+          POD_ID: 'hgnd02bb8xpuyn'
+        run: |
+          curl -X POST "https://api.runpod.io/v2/$POD_ID/restart" -H "Authorization: $RUNPOD_API_KEY"

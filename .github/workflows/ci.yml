@@ -1,0 +1,16 @@
+name: CI
+on: [push, pull_request]
+jobs:
+  test-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - run: pip install -r requirements-dev.txt
+      - run: |
+          black --check .
+          isort --check-only .
+          flake8 .
+          pytest -q --cov=app
+      - run: docker build -t ariwhispers-backend:${{ github.sha }} .
