@@ -1,0 +1,23 @@
+name: Build & Push to GHCR
+on:
+  push:
+    branches: [ main ]               # every merge to main triggers a push
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions: {packages: write, contents: read}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}   # built-in token works for public pkgs
+
+      - name: Build & push image
+        run: |
+          IMAGE=ghcr.io/${{ github.repository }}:latest   # → ghcr.io/ariwhispers/ariwhispers-infra-clean:latest
+          docker build -t $IMAGE .
+          docker push $IMAGE
