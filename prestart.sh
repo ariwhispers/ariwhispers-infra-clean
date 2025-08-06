@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+﻿#!/usr/bin/env bash
         set -e
-        echo '⏳ Pre-start…'; alembic upgrade head || echo 'No DB – skipping'
+        echo 'â³ Pre-startâ€¦'; alembic upgrade head || echo 'No DB â€“ skipping'
         exec "$@"
